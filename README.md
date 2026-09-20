@@ -20,10 +20,15 @@ eszközöket és a moduljaikat. A 3. lépéstől ez fog a szerverre POST-olni.
 Indítás:
 
 ```bash
-python -m http.server 8000
+python tools/devserver.py
 ```
 
-Majd `http://localhost:8000/atjaro.html`. A Web Serialhoz **Chrome vagy Edge**
+Majd `http://localhost:8000/atjaro.html`.
+
+> **Miért nem sima `python -m http.server`?** Mert az engedi a böngészőnek
+> gyorsítótárazni. Fejlesztés közben így összekeveredik a RÉGI HTML és az ÚJ
+> JavaScript, és olyan hibát látsz, ami a kódban nincs is benne. A
+> `devserver.py` minden válaszra `no-store` fejlécet tesz. Élesbe nem való. A Web Serialhoz **Chrome vagy Edge**
 kell, és `localhost` vagy `https` (a `localhost` biztonságos kontextusnak számít).
 
 **Hardver nélkül is kipróbálható:** a *Szimuláció indítása* gomb három virtuális

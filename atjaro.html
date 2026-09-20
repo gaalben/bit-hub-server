@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>bit:hub átjáró</title>
+<link rel="stylesheet" href="css/atjaro.css">
+</head>
+<body>
+
+<header class="bar">
+    <h1>bit:hub <span class="sub">átjáró</span></h1>
+
+    <div class="actions">
+        <button id="btn-serial" class="primary">Csatlakozás a hubhoz</button>
+        <button id="btn-sim">Szimuláció indítása</button>
+        <button id="btn-stop" disabled>Leállítás</button>
+    </div>
+
+    <div id="status" class="status idle">Nincs kapcsolat</div>
+</header>
+
+<main>
+    <section class="panel">
+        <div class="panel-head">
+            <h2>Eszközök és modulok</h2>
+            <div class="stats">
+                <span><b id="stat-devices">0</b> eszköz</span>
+                <span><b id="stat-rate">0</b> üzenet/mp</span>
+                <span><b id="stat-total">0</b> összesen</span>
+                <span class="bad"><b id="stat-bad">0</b> hibás</span>
+            </div>
+        </div>
+
+        <table id="devices">
+            <thead>
+                <tr>
+                    <th>Eszköz</th>
+                    <th>Állapot</th>
+                    <th>Modul</th>
+                    <th>Típus</th>
+                    <th>Irány</th>
+                    <th class="num">Érték</th>
+                    <th>Mérés ideje</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="empty"><td colspan="7">Még nem hallottunk egyetlen eszközt sem.</td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section class="panel">
+        <div class="panel-head">
+            <h2>Forgalom</h2>
+            <div class="log-actions">
+                <label><input type="checkbox" id="only-bad"> csak a hibás sorok</label>
+                <button id="btn-clear-log" class="small">Napló ürítése</button>
+            </div>
+        </div>
+        <pre id="log" class="log"></pre>
+
+        <div class="send-row">
+            <label for="send-line">Sor küldése a hubnak:</label>
+            <input type="text" id="send-line" placeholder="pl. &gt;1,3,1,0" maxlength="19" spellcheck="false">
+            <button id="btn-send" class="small" disabled>Küldés</button>
+            <span id="send-hint" class="hint"></span>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <p>
+        <b>2. lépés</b> — az átjáró még nem beszél a szerverrel: olvas, értelmez és mutat.
+        A Web Serialhoz Chrome vagy Edge kell, és <code>localhost</code> vagy <code>https</code>.
+        Szimuláció módban hardver nélkül is kipróbálható.
+    </p>
+</footer>
+
+<script type="module" src="js/atjaro.js"></script>
+</body>
+</html>

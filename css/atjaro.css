@@ -1,0 +1,225 @@
+/* bit:hub — átjáró lap. Egyszerű, sűrű, jól olvasható kivetítőn is. */
+
+:root {
+    --bg: #f4f6f8;
+    --panel: #ffffff;
+    --ink: #1c2530;
+    --muted: #6b7784;
+    --line: #dde3e9;
+    --brand: #1e88e5;
+    --brand-dark: #1565c0;
+    --ok: #2e9e5b;
+    --warn: #d98324;
+    --bad: #c8392f;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 15px/1.45 system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+/* --- fejléc --- */
+
+.bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 12px 20px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    z-index: 5;
+}
+
+.bar h1 {
+    margin: 0;
+    font-size: 20px;
+    letter-spacing: -0.2px;
+}
+
+.bar h1 .sub {
+    color: var(--muted);
+    font-weight: 400;
+}
+
+.actions { display: flex; gap: 8px; }
+
+button {
+    font: inherit;
+    padding: 7px 14px;
+    border: 1px solid var(--line);
+    background: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+}
+button:hover:not(:disabled) { border-color: var(--brand); color: var(--brand-dark); }
+button:disabled { opacity: 0.45; cursor: default; }
+button.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+button.primary:hover:not(:disabled) { background: var(--brand-dark); color: #fff; }
+button.small { padding: 4px 10px; font-size: 13px; }
+
+.status {
+    margin-left: auto;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+}
+.status.idle { background: #eceff1; color: var(--muted); }
+.status.live { background: #e3f4e9; color: var(--ok); }
+.status.sim  { background: #fdf1e0; color: var(--warn); }
+.status.err  { background: #fbe7e5; color: var(--bad); }
+
+/* --- panelek --- */
+
+main {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 20px;
+    display: grid;
+    gap: 20px;
+}
+
+.panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.panel-head {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+}
+
+.panel-head h2 { margin: 0; font-size: 16px; }
+
+.stats {
+    margin-left: auto;
+    display: flex;
+    gap: 16px;
+    font-size: 13px;
+    color: var(--muted);
+}
+.stats b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.stats .bad b { color: var(--bad); }
+.stats span.over b { color: var(--bad); }
+.stats span.over::after { content: " ⚠"; color: var(--bad); }
+
+.log-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+/* --- táblázat --- */
+
+table { width: 100%; border-collapse: collapse; }
+
+th, td {
+    padding: 8px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--line);
+}
+
+th {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--muted);
+    font-weight: 600;
+}
+
+tbody tr:last-child td { border-bottom: none; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+td.value { font-weight: 600; }
+td.dim { color: var(--muted); }
+tr.empty td { color: var(--muted); text-align: center; padding: 28px; }
+
+/* Az eszköz első sora kapja a keretet — így látszik a csoportosítás. */
+tr.device-start td { border-top: 2px solid var(--line); }
+tr.device-start:first-child td { border-top: none; }
+
+.pill {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+.pill.on { background: #e3f4e9; color: var(--ok); }
+.pill.off { background: #fbe7e5; color: var(--bad); }
+.pill.power { background: #fdf1e0; color: var(--warn); margin-left: 6px; }
+
+/* Rövid felvillanás, amikor új érték érkezik. */
+@keyframes flash { from { background: #fff6cc; } to { background: transparent; } }
+td.flash { animation: flash 0.8s ease-out; }
+
+/* --- napló --- */
+
+.log {
+    margin: 0;
+    padding: 12px 16px;
+    height: 260px;
+    overflow-y: auto;
+    font: 13px/1.5 ui-monospace, "Cascadia Mono", Consolas, monospace;
+    background: #10161d;
+    color: #d6e2ee;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+.log .in { color: #8fd3a0; }
+.log .out { color: #f0c674; }
+.log .err { color: #ff8b7e; }
+.log .time { color: #5c6b7a; }
+
+.send-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-top: 1px solid var(--line);
+    flex-wrap: wrap;
+}
+.send-row input[type=text] {
+    font: 14px ui-monospace, Consolas, monospace;
+    padding: 6px 10px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    width: 220px;
+}
+.hint { font-size: 13px; color: var(--muted); }
+.hint.bad { color: var(--bad); }
+
+footer {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 20px 32px;
+    color: var(--muted);
+    font-size: 13px;
+}
+footer code {
+    background: #e9edf1;
+    padding: 1px 5px;
+    border-radius: 4px;
+}
+
+@media (max-width: 720px) {
+    .bar { gap: 10px; }
+    .status { margin-left: 0; }
+    th, td { padding: 7px 10px; }
+    .stats { gap: 10px; }
+}

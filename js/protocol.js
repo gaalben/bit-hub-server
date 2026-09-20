@@ -14,22 +14,32 @@ import { CONFIG } from "./config.js";
 // (A tanár a dashboardon úgyis átnevezheti a csempét.)
 
 export const TYPES = {
-    tmp: { name: "hőmérséklet", unit: "°C" },
-    lgt: { name: "fény", unit: "" },
-    hum: { name: "páratartalom", unit: "%" },
-    soi: { name: "talajnedvesség", unit: "" },
-    dst: { name: "távolság", unit: "cm" },
-    snd: { name: "hang", unit: "" },
-    acc: { name: "gyorsulás", unit: "mg" },
-    btn: { name: "gomb", unit: "" },
-    pot: { name: "potméter", unit: "" },
-    led: { name: "LED", unit: "" },
-    rly: { name: "relé", unit: "" },
-    pmp: { name: "pumpa", unit: "" },
-    srv: { name: "szervo", unit: "°" },
-    mot: { name: "motor", unit: "" },
-    buz: { name: "zsongor", unit: "" },
-    mtx: { name: "LED-mátrix", unit: "" },
+    tmp: { name: "hőmérséklet", unit: "°C", min: -10, max: 50 },
+    lgt: { name: "fény", unit: "", min: 0, max: 255 },
+    hum: { name: "páratartalom", unit: "%", min: 0, max: 100 },
+    soi: { name: "talajnedvesség", unit: "", min: 0, max: 1023 },
+    dst: { name: "távolság", unit: "cm", min: 0, max: 200 },
+    snd: { name: "hang", unit: "", min: 0, max: 255 },
+    acc: { name: "gyorsulás", unit: "mg", min: 0, max: 2048 },
+    btn: { name: "gomb", unit: "", min: 0, max: 1, states: ["nincs nyomva", "nyomva"] },
+    pot: { name: "potméter", unit: "", min: 0, max: 1023 },
+
+    led: { name: "LED", unit: "", min: 0, max: 1, states: ["sötét", "világít"] },
+    rly: { name: "relé", unit: "", min: 0, max: 1, states: ["kikapcsolva", "bekapcsolva"] },
+    pmp: { name: "pumpa", unit: "", min: 0, max: 1, states: ["áll", "jár"] },
+    srv: { name: "szervo", unit: "°", min: 0, max: 180 },
+    mot: { name: "motor", unit: "", min: 0, max: 1023 },
+    buz: { name: "zsongor", unit: "", min: 0, max: 1, states: ["néma", "szól"] },
+    mtx: { name: "LED-mátrix", unit: "", min: 0, max: 1, states: ["sötét", "világít"] },
+
+    // A közlekedési lámpa saját típus, nem három külön LED: így a felület
+    // egyetlen, felismerhető csempét tud rajzolni belőle, és a gyerek a
+    // lámpa SZÍNÉT látja, nem azt, hogy "2".
+    tlt: {
+        name: "közlekedési lámpa", unit: "", min: 0, max: 3,
+        states: ["sötét", "piros", "sárga", "zöld"]
+    },
+
     oth: { name: "egyéb", unit: "" }
 };
 
@@ -53,6 +63,24 @@ export function typeName(code) {
 
 export function typeUnit(code) {
     return (TYPES[code] && TYPES[code].unit) || "";
+}
+
+/** Az érték értelmezési tartománya — ebből lesz a csempén a csík. */
+export function typeRange(code) {
+    const t = TYPES[code];
+    if (!t || t.min === undefined) return null;
+    return { min: t.min, max: t.max };
+}
+
+/**
+ * Az érték SZAVAKKAL, ha a típusnak vannak nevesített állapotai.
+ * Kisiskolásnak a "bekapcsolva" többet mond, mint az "1".
+ */
+export function stateLabel(code, value) {
+    const t = TYPES[code];
+    if (!t || !t.states) return null;
+    const i = Math.round(value);
+    return t.states[i] !== undefined ? t.states[i] : null;
 }
 
 // --- bejövő üzenetek értelmezése ------------------------------------------

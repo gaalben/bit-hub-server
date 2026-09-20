@@ -9,6 +9,7 @@ import { CONFIG } from "./config.js";
 import { Gateway } from "./gateway.js";
 import { SerialTransport, SimTransport } from "./transport.js";
 import { DIRECTIONS, REASONS, typeName, typeUnit } from "./protocol.js";
+import { moduleTile, deviceHeader } from "./tiles.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -27,8 +28,16 @@ const ui = {
     statDevices: $("stat-devices"),
     statRate: $("stat-rate"),
     statTotal: $("stat-total"),
-    statBad: $("stat-bad")
+    statBad: $("stat-bad"),
+    tiles: $("tiles"),
+    table: $("devices"),
+    viewTiles: $("view-tiles"),
+    viewTable: $("view-table")
 };
+
+// A csempés nézet az alapértelmezett: ez szól a diákoknak.
+// A táblázat a tanári/hibakeresési nézet.
+let view = "tiles";
 
 const gw = new Gateway();
 let transport = null;
@@ -143,6 +152,41 @@ function tick() {
     render();
 }
 
+function setView(next) {
+    view = next;
+    ui.viewTiles.classList.toggle("active", next === "tiles");
+    ui.viewTable.classList.toggle("active", next === "table");
+    ui.tiles.hidden = next !== "tiles";
+    ui.table.hidden = next !== "table";
+    render();
+}
+
+function renderTiles() {
+    const devices = [...gw.devices.values()].sort((a, b) => a.id - b.id);
+    if (devices.length === 0) {
+        ui.tiles.innerHTML =
+            `<p class="empty">Még nem hallottunk egyetlen eszközt sem.</p>`;
+        return;
+    }
+
+    ui.tiles.innerHTML = devices.map(dev => {
+        const mods = [...dev.modules.values()].sort((a, b) => a.slot - b.slot);
+        const body = mods.length === 0
+            ? `<p class="empty">bemutatkozás folyamatban…</p>`
+            : `<div class="tile-group">${
+                mods.map(m => moduleTile(dev, m)).join("")}</div>`;
+        return deviceHeader(dev, gw.isOnline(dev)) + body;
+    }).join("");
+
+    // A frissen változott csempék keretét villantjuk meg. Az elemeket
+    // most rajzoltuk újra, ezért az osztályt utólag tesszük rá.
+    for (const key of flashed) {
+        const el = ui.tiles.querySelector(`.tile[data-key="${key}"]`);
+        if (el) el.classList.add("fresh");
+    }
+    flashed.clear();
+}
+
 function render() {
     ui.statDevices.textContent = gw.devices.size;
     ui.statRate.textContent = gw.stats.rate.toFixed(1);
@@ -156,6 +200,11 @@ function render() {
         : "A rádió kb. 8-10 csomag/mp-ig megbízható.";
     ui.statTotal.textContent = gw.stats.total;
     ui.statBad.textContent = gw.stats.bad;
+
+    if (view === "tiles") {
+        renderTiles();
+        return;
+    }
 
     const rows = gw.rows();
     if (rows.length === 0) {
@@ -252,6 +301,8 @@ ui.btnStop.addEventListener("click", stop);
 ui.btnSend.addEventListener("click", sendManual);
 ui.sendLine.addEventListener("keydown", (e) => { if (e.key === "Enter") sendManual(); });
 ui.btnClearLog.addEventListener("click", () => { ui.log.innerHTML = ""; });
+ui.viewTiles.addEventListener("click", () => setView("tiles"));
+ui.viewTable.addEventListener("click", () => setView("table"));
 
 // Ha a böngésző nem tudja a Web Serialt, mondjuk meg előre, ne kattintáskor.
 if (!SerialTransport.supported) {

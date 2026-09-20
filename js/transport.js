@@ -134,16 +134,21 @@ export class SimTransport {
             { id: 1, modules: [
                 { slot: 1, type: "tmp", dir: "i", base: 22, amp: 3, noise: 0.08, minChange: 0.5 },
                 { slot: 2, type: "lgt", dir: "i", base: 130, amp: 90, noise: 4, minChange: 20 },
-                { slot: 3, type: "rly", dir: "o", base: 0, amp: 0, noise: 0, minChange: 1 }
+                { slot: 3, type: "tlt", dir: "o", base: 0, amp: 0, noise: 0, minChange: 1,
+                  cycle: "traffic" }
             ]},
             { id: 2, modules: [
                 { slot: 1, type: "soi", dir: "i", base: 480, amp: 60, noise: 5, minChange: 20 },
-                { slot: 2, type: "pmp", dir: "o", base: 0, amp: 0, noise: 0, minChange: 1, power: true }
+                { slot: 2, type: "pmp", dir: "o", base: 0, amp: 0, noise: 0, minChange: 1, power: true },
+                { slot: 3, type: "mot", dir: "a", base: 0, amp: 0, noise: 0, minChange: 1,
+                  cycle: "motor", power: true }
             ]},
             { id: 3, modules: [
                 { slot: 1, type: "tmp", dir: "i", base: 19, amp: 1.5, noise: 0.05, minChange: 0.3 },
                 { slot: 2, type: "hum", dir: "i", base: 55, amp: 10, noise: 0.8, minChange: 2 },
-                { slot: 3, type: "dst", dir: "i", base: 40, amp: 25, noise: 1.5, minChange: 4 }
+                { slot: 3, type: "dst", dir: "i", base: 40, amp: 25, noise: 1.5, minChange: 4 },
+                { slot: 4, type: "rly", dir: "o", base: 0, amp: 0, noise: 0, minChange: 1,
+                  cycle: "relay" }
             ]}
         ];
 
@@ -208,11 +213,49 @@ export class SimTransport {
                 }
             }
 
+            // --- automatikusan mozgó aktuátorok ---
+            // Úgy viselkednek, mintha SZABÁLY vezérelné őket az eszközön:
+            // az esemény "r" okkal megy, és azonnal, nem ütemezve.
+            for (const m of dev.modules) {
+                if (!m.cycle) continue;
+                const next = this.cycleValue(m, now);
+                if (next !== null && next !== m.sent) {
+                    this.emit(`*${dev.id},${m.slot},${next},r,${t}`);
+                    m.sent = next;
+                    dev.lastTx = now;
+                }
+            }
+
             // --- életjel, ha 10 mp-ig nem volt más forgalom ---
             if (now - dev.lastTx >= 10000) {
                 this.emit(`~${dev.id},${t},0`);
                 dev.lastTx = now;
             }
+        }
+    }
+
+    /**
+     * Az önmaguktól mozgó aktuátorok következő állapota.
+     * A közlekedési lámpa végigjárja a piros-sárga-zöld kört, a motor
+     * fokozatokat vált, a relé lassan billeg — így a csempés nézeten
+     * látszik, hogy ezek élnek.
+     */
+    cycleValue(m, now) {
+        switch (m.cycle) {
+            case "traffic": {
+                // 4 mp-enként lép: piros → sárga → zöld → sárga → …
+                const seq = [1, 2, 3, 2];
+                return seq[Math.floor(now / 4000) % seq.length];
+            }
+            case "motor": {
+                // 7 mp-enként fokozat: áll → lassú → közepes → gyors
+                const seq = [0, 250, 600, 1023];
+                return seq[Math.floor(now / 7000) % seq.length];
+            }
+            case "relay":
+                return Math.floor(now / 9000) % 2;
+            default:
+                return null;
         }
     }
 

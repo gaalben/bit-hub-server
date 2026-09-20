@@ -24,6 +24,10 @@
     <section class="panel">
         <div class="panel-head">
             <h2>Eszközök és modulok</h2>
+            <div class="viewswitch" role="group" aria-label="Nézet">
+                <button id="view-tiles" class="seg active">Csempék</button>
+                <button id="view-table" class="seg">Táblázat</button>
+            </div>
             <div class="stats">
                 <span><b id="stat-devices">0</b> eszköz</span>
                 <span><b id="stat-rate">0</b> üzenet/mp</span>
@@ -32,7 +36,11 @@
             </div>
         </div>
 
-        <table id="devices">
+        <div id="tiles" class="tiles">
+            <p class="empty">Még nem hallottunk egyetlen eszközt sem.</p>
+        </div>
+
+        <table id="devices" hidden>
             <thead>
                 <tr>
                     <th>Eszköz</th>

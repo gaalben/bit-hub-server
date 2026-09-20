@@ -223,3 +223,176 @@ footer code {
     th, td { padding: 7px 10px; }
     .stats { gap: 10px; }
 }
+
+/* ========================================================================
+   CSEMPÉS NÉZET — ez a gyerekeknek szóló felület.
+   Nagy piktogram, nagy szó, és csak utána a szám.
+   ======================================================================== */
+
+.viewswitch { display: flex; gap: 0; }
+.seg {
+    border-radius: 0;
+    padding: 5px 14px;
+    font-size: 13px;
+}
+.seg:first-child { border-radius: 6px 0 0 6px; }
+.seg:last-child { border-radius: 0 6px 6px 0; margin-left: -1px; }
+.seg.active {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: #fff;
+}
+.seg.active:hover { background: var(--brand-dark); color: #fff; }
+
+.tiles { padding: 16px; }
+.tiles > .empty {
+    color: var(--muted);
+    text-align: center;
+    padding: 28px;
+    margin: 0;
+}
+
+/* Eszköz-elválasztó fejléc a csempecsoport fölött */
+.device-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 4px 0 10px;
+}
+.device-head:not(:first-child) {
+    margin-top: 22px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+}
+.device-id { font-size: 18px; font-weight: 700; }
+.device-meta { font-size: 13px; color: var(--muted); }
+
+.tile-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 12px;
+}
+
+.tile {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fff;
+    min-height: 104px;
+}
+
+.tile-icon {
+    flex: 0 0 auto;
+    width: 56px;
+    height: 56px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    background: #f1f5f8;
+}
+.tile-icon .icon { width: 42px; height: 42px; display: block; }
+
+/* A szenzor nyugodt kék, az aktuátor a BE/KI állapotától függ:
+   kikapcsolva szürke, bekapcsolva zöld — ez a legfontosabb jel. */
+.tile.sensor .tile-icon { color: var(--brand); }
+.tile.actuator.off .tile-icon { color: #90a0ae; }
+.tile.actuator.on .tile-icon { color: var(--ok); background: #e3f4e9; }
+
+/* A közlekedési lámpa saját színeit hozza, ne színezzük felül —
+   és a zöld "bekapcsolva" háttér is félrevezetne piros lámpánál. */
+.tile-icon .icon-wide { width: 40px; }
+.tile.actuator.on[data-type="tlt"] .tile-icon { background: #f1f5f8; }
+
+/* Az állapot szava a lámpa színét kapja. */
+.tile.actuator.on .tile-state.tl-red { color: #c8392f; }
+.tile.actuator.on .tile-state.tl-yellow { color: #b8720f; }
+.tile.actuator.on .tile-state.tl-green { color: #2e9e5b; }
+.tile.actuator .tile-state.tl-dark { color: var(--muted); }
+
+.tile-body { min-width: 0; flex: 1; }
+
+.tile-name {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 2px;
+}
+
+.tile-value {
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+}
+.tile-value .unit {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-left: 3px;
+}
+.tile-value.dim { color: var(--muted); font-weight: 400; }
+
+/* Ahol van értelmes állapotnév, az a főszereplő. */
+.tile-state {
+    font-size: 21px;
+    font-weight: 700;
+    line-height: 1.15;
+}
+.tile.actuator.on .tile-state { color: var(--ok); }
+.tile.actuator.off .tile-state { color: var(--muted); }
+
+.tile-bar {
+    margin-top: 8px;
+    height: 7px;
+    border-radius: 999px;
+    background: #e7edf2;
+    overflow: hidden;
+}
+.tile-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--brand);
+    transition: width 0.4s ease;
+}
+.tile.actuator .tile-bar-fill { background: var(--ok); }
+
+.tile-meta {
+    margin-top: 8px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.chip {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #eef2f5;
+    color: var(--muted);
+    white-space: nowrap;
+}
+.chip.warn { background: #fdf1e0; color: var(--warn); }
+.chip.dev { font-variant-numeric: tabular-nums; }
+
+.tile-time {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    font-size: 11px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Friss érték: rövid felvillanás a csempe keretén. */
+@keyframes tileflash {
+    from { border-color: var(--brand); box-shadow: 0 0 0 3px #d8ebfb; }
+    to   { border-color: var(--line); box-shadow: none; }
+}
+.tile.fresh { animation: tileflash 0.9s ease-out; }
+
+@media (max-width: 560px) {
+    .tile-group { grid-template-columns: 1fr; }
+    .tiles { padding: 12px; }
+}

@@ -239,3 +239,43 @@ export function actuatorIcon(type, value) {
 export function isTrafficLight(type) {
     return type === "tlt";
 }
+
+// --- micro:bit tábla ------------------------------------------------------
+
+/**
+ * Kis micro:bit a sorszámmal A SAJÁT KIJELZŐJÉN.
+ *
+ * Nem dísz: a diák így tudja összepárosítani a képernyőn látott csempét az
+ * asztalon fekvő eszközzel. (Érdemes lesz a bővítménybe is betenni, hogy a
+ * valódi micro:bit is kiírja a sorszámát a LED-mátrixra.)
+ *
+ * @param {number} num az eszköz sorszáma (1-99)
+ * @param {boolean} online él-e az eszköz — a tábla színe ezt mutatja
+ * @param {number} w a rajz szélessége képpontban
+ */
+export function microbitIcon(num, online = true, w = 44) {
+    const label = String(num);
+    const fontSize = label.length > 1 ? 9.5 : 12.5;
+    const board = online ? "#2f9e5f" : "#9aa7b2";
+    const pin = online ? "#d9a441" : "#c3c9ce";
+
+    // Az élcsatlakozó fogai: a három nagy (3V, GND, P0-P2) és a kicsik.
+    let pins = "";
+    for (let i = 0; i < 12; i++) {
+        const big = i === 1 || i === 5 || i === 10;
+        const x = 4 + i * 3.4;
+        pins += `<rect x="${x}" y="26" width="${big ? 2.6 : 1.5}" height="${big ? 8 : 5}"
+                    rx="0.6" fill="${pin}"/>`;
+    }
+
+    return `<svg viewBox="0 0 48 36" class="mb" style="width:${w}px" aria-hidden="true">
+        <rect x="1.5" y="1.5" width="45" height="25" rx="3.5" fill="${board}"/>
+        <circle cx="7.5" cy="14" r="3.4" fill="#1c2530"/>
+        <circle cx="40.5" cy="14" r="3.4" fill="#1c2530"/>
+        <rect x="15" y="5" width="18" height="18" rx="2" fill="#151c24"/>
+        <text x="24" y="14.6" text-anchor="middle" dominant-baseline="middle"
+              font-family="ui-monospace, Consolas, monospace"
+              font-size="${fontSize}" font-weight="700" fill="#ff5a4e">${label}</text>
+        ${pins}
+    </svg>`;
+}

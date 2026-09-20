@@ -13,7 +13,7 @@
 // A 3. lépésben ez lesz a dashboard alapja; ott jön mellé a kapcsolás és
 // az átnevezés.
 
-import { sensorIcon, actuatorIcon } from "./icons.js";
+import { sensorIcon, actuatorIcon, microbitIcon } from "./icons.js";
 import { typeName, typeUnit, typeRange, stateLabel, REASONS } from "./protocol.js";
 
 /** Egy modul csempéje. */
@@ -62,7 +62,7 @@ export function moduleTile(dev, m, opts = {}) {
             ${main}
             ${bar}
             <div class="tile-meta">
-                <span class="chip dev">#${dev.id} · ${m.slot}</span>
+                <span class="chip dev">${microbitIcon(dev.id, true, 18)} ${m.slot}. modul</span>
                 ${power}${reason}
             </div>
         </div>
@@ -74,6 +74,7 @@ export function moduleTile(dev, m, opts = {}) {
 export function deviceHeader(dev, online) {
     return `
     <div class="device-head">
+        ${microbitIcon(dev.id, online, 46)}
         <span class="device-id">#${dev.id}</span>
         <span class="pill ${online ? "on" : "off"}">${online ? "él" : "néma"}</span>
         <span class="device-meta">${dev.modules.size} modul${

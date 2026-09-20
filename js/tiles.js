@@ -34,7 +34,7 @@ export function moduleTile(dev, m, opts = {}) {
         : "";
 
     const main = !hasValue
-        ? `<div class="tile-value dim">—</div>`
+        ? `<div class="tile-value dim">nincs jel</div>`
         : label
             ? `<div class="tile-state${stateClass}">${label}</div>`
             : `<div class="tile-value">${fmt(m.value)}<span class="unit">${unit}</span></div>`;
@@ -62,7 +62,7 @@ export function moduleTile(dev, m, opts = {}) {
             ${main}
             ${bar}
             <div class="tile-meta">
-                <span class="chip dev">${microbitIcon(dev.id, true, 18)} ${m.slot}. modul</span>
+                <span class="chip dev">${microbitIcon(dev.id, true, 15, "screen")} ${m.slot}. modul</span>
                 ${power}${reason}
             </div>
         </div>

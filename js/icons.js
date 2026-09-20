@@ -241,41 +241,135 @@ export function isTrafficLight(type) {
 }
 
 // --- micro:bit tábla ------------------------------------------------------
+//
+// SAJÁT rajz, nem a hivatalos logó: a micro:bit védjegy, és a Foundation
+// arculati irányelve kéri, hogy ne keltsük hivatalos termék látszatát.
+// (Ráadásul a részletes logó 18 képpontnál olvashatatlan volna.)
+//
+// A szám nem betűként van ráírva, hanem IGAZI LED-PONTOKBÓL kirakva, a
+// micro:bit 5x5-ös kijelzőjének mintájára — úgy, ahogy a valódi eszközön
+// is megjelenne.
+
+/** 3x5-ös számjegy-betűkészlet, a micro:bit saját kijelzőjének arányaival. */
+const DIGITS = {
+    "0": ["111", "101", "101", "101", "111"],
+    "1": ["010", "110", "010", "010", "111"],
+    "2": ["111", "001", "111", "100", "111"],
+    "3": ["111", "001", "111", "001", "111"],
+    "4": ["101", "101", "111", "001", "001"],
+    "5": ["111", "100", "111", "001", "111"],
+    "6": ["111", "100", "111", "101", "111"],
+    "7": ["111", "001", "010", "010", "010"],
+    "8": ["111", "101", "111", "101", "111"],
+    "9": ["111", "101", "111", "001", "111"]
+};
 
 /**
- * Kis micro:bit a sorszámmal A SAJÁT KIJELZŐJÉN.
- *
- * Nem dísz: a diák így tudja összepárosítani a képernyőn látott csempét az
- * asztalon fekvő eszközzel. (Érdemes lesz a bővítménybe is betenni, hogy a
- * valódi micro:bit is kiírja a sorszámát a LED-mátrixra.)
- *
- * @param {number} num az eszköz sorszáma (1-99)
- * @param {boolean} online él-e az eszköz — a tábla színe ezt mutatja
- * @param {number} w a rajz szélessége képpontban
+ * Az 5x5-ös kijelző pontjai. Egy számjegy középre kerül; két számjegynél
+ * nincs hely a rácson, ott a szám szövegként jelenik meg a kijelzőn
+ * (a valódi micro:bit ilyenkor végiggörgetné).
  */
-export function microbitIcon(num, online = true, w = 44) {
+function screenDots(num, x0, y0, step, r, onBoard = false) {
+    const offColor = onBoard ? "#7a2f2a" : "#41262a";
     const label = String(num);
-    const fontSize = label.length > 1 ? 9.5 : 12.5;
-    const board = online ? "#2f9e5f" : "#9aa7b2";
-    const pin = online ? "#d9a441" : "#c3c9ce";
+    const glyph = label.length === 1 ? DIGITS[label] : null;
+    let out = "";
 
-    // Az élcsatlakozó fogai: a három nagy (3V, GND, P0-P2) és a kicsik.
-    let pins = "";
-    for (let i = 0; i < 12; i++) {
-        const big = i === 1 || i === 5 || i === 10;
-        const x = 4 + i * 3.4;
-        pins += `<rect x="${x}" y="26" width="${big ? 2.6 : 1.5}" height="${big ? 8 : 5}"
-                    rx="0.6" fill="${pin}"/>`;
+    if (!glyph) {
+        const cx = x0 + step * 2;
+        const cy = y0 + step * 2;
+        return `<text x="${cx}" y="${cy}" text-anchor="middle"
+                    dominant-baseline="central"
+                    font-family="ui-monospace, Consolas, monospace"
+                    font-size="${step * 2.6}" font-weight="700"
+                    fill="#ff4b3e">${label}</text>`;
     }
 
-    return `<svg viewBox="0 0 48 36" class="mb" style="width:${w}px" aria-hidden="true">
-        <rect x="1.5" y="1.5" width="45" height="25" rx="3.5" fill="${board}"/>
-        <circle cx="7.5" cy="14" r="3.4" fill="#1c2530"/>
-        <circle cx="40.5" cy="14" r="3.4" fill="#1c2530"/>
-        <rect x="15" y="5" width="18" height="18" rx="2" fill="#151c24"/>
-        <text x="24" y="14.6" text-anchor="middle" dominant-baseline="middle"
-              font-family="ui-monospace, Consolas, monospace"
-              font-size="${fontSize}" font-weight="700" fill="#ff5a4e">${label}</text>
-        ${pins}
+    for (let row = 0; row < 5; row++) {
+        for (let col = 0; col < 5; col++) {
+            // A 3 széles számjegy középre, egy-egy üres oszloppal a szélén.
+            const lit = col >= 1 && col <= 3 && glyph[row][col - 1] === "1";
+            out += `<circle cx="${x0 + col * step}" cy="${y0 + row * step}" r="${r}"
+                fill="${lit ? "#ff4b3e" : offColor}"/>`;
+        }
+    }
+    return out;
+}
+
+/**
+ * Kis micro:bit a sorszámával.
+ *
+ * Nem dísz: a diák így tudja összepárosítani a képernyőn látott csempét az
+ * asztalon fekvő eszközzel.
+ *
+ * @param {number} num az eszköz sorszáma (1-99)
+ * @param {boolean} online él-e az eszköz — a panel színe ezt mutatja
+ * @param {number} w a rajz szélessége képpontban
+ * @param {"board"|"screen"} variant teljes panel, vagy csak a kijelző
+ */
+export function microbitIcon(num, online = true, w = 46, variant = "board") {
+    // Kis méretben a panel részletei csak kásásak lennének — ott a
+    // kijelző önmagában is félreismerhetetlen.
+    if (variant === "screen") {
+        return `<svg viewBox="0 0 40 40" class="mb mb-screen" style="width:${w}px"
+                     aria-hidden="true">
+            <rect width="40" height="40" rx="6" fill="#151c24"
+                  opacity="${online ? 1 : 0.55}"/>
+            ${screenDots(num, 8, 8, 6, 2.3)}
+        </svg>`;
+    }
+
+    const board = online ? "#38a04a" : "#9aa7b2";
+    const gold = online ? "#e0b341" : "#c6ccd1";
+
+    // Az élcsatlakozó: öt nagy érintkező-fül, köztük BEVÁGÁSOKKAL. A panel
+    // maga fut le a fülekbe — ez a micro:bit legjellegzetesebb éle, és a
+    // korábbi rajz épp ezt hibázta el (a lábak külön lógtak a panel alatt).
+    const tabs = [[5, 21], [24.5, 40.5], [44, 60], [63.5, 79.5], [83, 99]];
+    const cut = 58;      // meddig ér fel a bevágás
+    const bottom = 76;   // a fülek alja
+
+    let edge = `M9 1 H91 A8 8 0 0 1 99 9 V${cut} `;
+    for (let i = tabs.length - 1; i >= 0; i--) {
+        const [l, r] = tabs[i];
+        edge += `H${r} V${bottom} H${l} V${cut} `;
+    }
+    edge += `H1 V9 A8 8 0 0 1 9 1 Z`;
+
+    // Aranyozás a füleken, furattal; fölöttük a keskeny lábak nyomai.
+    let pads = "";
+    for (const [l, r] of tabs) {
+        const cx = (l + r) / 2;
+        pads += `<rect x="${l + 1.5}" y="${cut + 2}" width="${r - l - 3}"
+                    height="${bottom - cut - 3}" rx="1.2" fill="${gold}"/>
+                 <circle cx="${cx}" cy="${cut + 9}" r="3" fill="#151c24" opacity="0.8"/>`;
+    }
+    for (let i = 0; i < tabs.length - 1; i++) {
+        const from = tabs[i][1] + 0.5;
+        const to = tabs[i + 1][0] - 0.5;
+        const gap = (to - from) / 4;
+        for (let k = 1; k <= 3; k++) {
+            pads += `<rect x="${(from + gap * k - 0.9).toFixed(1)}" y="50"
+                        width="1.8" height="8" rx="0.6" fill="${gold}"/>`;
+        }
+    }
+
+    return `<svg viewBox="0 0 100 80" class="mb" style="width:${w}px" aria-hidden="true">
+        <path d="${edge}" fill="${board}"/>
+
+        <!-- USB-csatlakozó és elemcsatlakozó a felső élen -->
+        <rect x="41" y="0" width="18" height="6" rx="1.5" fill="#b9c2c9"/>
+        <rect x="9" y="0" width="10" height="5" rx="1.5" fill="#f2f4f6"/>
+
+        <!-- A és B gomb -->
+        <rect x="7" y="25" width="16" height="16" rx="3" fill="#23272b"/>
+        <circle cx="15" cy="33" r="4.4" fill="#41494f"/>
+        <rect x="77" y="25" width="16" height="16" rx="3" fill="#23272b"/>
+        <circle cx="85" cy="33" r="4.4" fill="#41494f"/>
+
+        <!-- a sorszám LED-pontokból, KÖZVETLENÜL a panelen (mint az igazin) -->
+        ${screenDots(num, 38, 24, 6, 2.5, true)}
+
+        ${pads}
     </svg>`;
 }

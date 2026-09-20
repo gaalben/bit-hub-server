@@ -411,3 +411,5 @@ footer code {
     padding-left: 4px;
 }
 .chip.dev .mb { height: auto; }
+.mb-screen { border-radius: 3px; vertical-align: -2px; }
+.tile-value.dim { font-size: 17px; }

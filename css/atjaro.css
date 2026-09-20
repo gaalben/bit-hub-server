@@ -1,16 +1,33 @@
 /* bit:hub — átjáró lap. Egyszerű, sűrű, jól olvasható kivetítőn is. */
 
 :root {
-    --bg: #f4f6f8;
-    --panel: #ffffff;
-    --ink: #1c2530;
-    --muted: #6b7784;
-    --line: #dde3e9;
-    --brand: #1e88e5;
-    --brand-dark: #1565c0;
+    /* --------------------------------------------------------------------
+       A bit:plot arculatából átvéve, hogy a két termék egy családnak
+       látsszon. A jelzőszín egy árnyalattal MÉLYEBB és vörösebb réz, mint a
+       bit:ploté (#b05c20) — testvér, nem másolat.
+       -------------------------------------------------------------------- */
+    --bg: #f6f7f9;
+    --surface: #ffffff;
+    --ink: #1b2430;
+    --muted: #64748b;
+    --line: #e6e9ee;
+
+    --signal: #9a4f28;          /* réz — a bit:hub jelzőszíne */
+    --signal-dark: #7d3f1f;
+    --signal-weak: #f6e8db;
+
+    /* ÁLLAPOTSZÍNEK — itt szándékosan eltérünk a bit:plottól.
+       Ott az --ok is réz, mert nincs mit kapcsolni. A bit:hubon a
+       "be van kapcsolva" és a "néma" FUNKCIONÁLIS jelzés, amit egy
+       nyolcéves is fel kell ismerjen — ezt nem szabad a márkaszínnel
+       összemosni. */
     --ok: #2e9e5b;
-    --warn: #d98324;
-    --bad: #c8392f;
+    --warn: #b45309;
+    --bad: #dc2626;
+
+    --radius: 10px;
+    --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
 }
 
 * { box-sizing: border-box; }
@@ -19,7 +36,7 @@ body {
     margin: 0;
     background: var(--bg);
     color: var(--ink);
-    font: 15px/1.45 system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+    font: 15px/1.45 var(--font-ui);
 }
 
 /* --- fejléc --- */
@@ -30,7 +47,7 @@ body {
     gap: 16px;
     flex-wrap: wrap;
     padding: 12px 20px;
-    background: var(--panel);
+    background: var(--surface);
     border-bottom: 1px solid var(--line);
     position: sticky;
     top: 0;
@@ -58,10 +75,10 @@ button {
     border-radius: 6px;
     cursor: pointer;
 }
-button:hover:not(:disabled) { border-color: var(--brand); color: var(--brand-dark); }
+button:hover:not(:disabled) { border-color: var(--signal); color: var(--signal-dark); }
 button:disabled { opacity: 0.45; cursor: default; }
-button.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
-button.primary:hover:not(:disabled) { background: var(--brand-dark); color: #fff; }
+button.primary { background: var(--signal); border-color: var(--signal); color: #fff; }
+button.primary:hover:not(:disabled) { background: var(--signal-dark); color: #fff; }
 button.small { padding: 4px 10px; font-size: 13px; }
 
 .status {
@@ -87,7 +104,7 @@ main {
 }
 
 .panel {
-    background: var(--panel);
+    background: var(--surface);
     border: 1px solid var(--line);
     border-radius: 10px;
     overflow: hidden;
@@ -175,7 +192,7 @@ td.flash { animation: flash 0.8s ease-out; }
     padding: 12px 16px;
     height: 260px;
     overflow-y: auto;
-    font: 13px/1.5 ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font: 13px/1.5 var(--font-mono);
     background: #10161d;
     color: #d6e2ee;
     white-space: pre-wrap;
@@ -195,7 +212,7 @@ td.flash { animation: flash 0.8s ease-out; }
     flex-wrap: wrap;
 }
 .send-row input[type=text] {
-    font: 14px ui-monospace, Consolas, monospace;
+    font: 14px var(--font-mono);
     padding: 6px 10px;
     border: 1px solid var(--line);
     border-radius: 6px;
@@ -238,11 +255,11 @@ footer code {
 .seg:first-child { border-radius: 6px 0 0 6px; }
 .seg:last-child { border-radius: 0 6px 6px 0; margin-left: -1px; }
 .seg.active {
-    background: var(--brand);
-    border-color: var(--brand);
+    background: var(--signal);
+    border-color: var(--signal);
     color: #fff;
 }
-.seg.active:hover { background: var(--brand-dark); color: #fff; }
+.seg.active:hover { background: var(--signal-dark); color: #fff; }
 
 .tiles { padding: 16px; }
 .tiles > .empty {
@@ -298,7 +315,7 @@ footer code {
 
 /* A szenzor nyugodt kék, az aktuátor a BE/KI állapotától függ:
    kikapcsolva szürke, bekapcsolva zöld — ez a legfontosabb jel. */
-.tile.sensor .tile-icon { color: var(--brand); }
+.tile.sensor .tile-icon { color: var(--signal); }
 .tile.actuator.off .tile-icon { color: #90a0ae; }
 .tile.actuator.on .tile-icon { color: var(--ok); background: #e3f4e9; }
 
@@ -354,7 +371,7 @@ footer code {
 .tile-bar-fill {
     height: 100%;
     border-radius: 999px;
-    background: var(--brand);
+    background: var(--signal);
     transition: width 0.4s ease;
 }
 .tile.actuator .tile-bar-fill { background: var(--ok); }
@@ -387,7 +404,7 @@ footer code {
 
 /* Friss érték: rövid felvillanás a csempe keretén. */
 @keyframes tileflash {
-    from { border-color: var(--brand); box-shadow: 0 0 0 3px #d8ebfb; }
+    from { border-color: var(--signal); box-shadow: 0 0 0 3px var(--signal-weak); }
     to   { border-color: var(--line); box-shadow: none; }
 }
 .tile.fresh { animation: tileflash 0.9s ease-out; }
@@ -413,3 +430,16 @@ footer code {
 .chip.dev .mb { height: auto; }
 .mb-screen { border-radius: 3px; vertical-align: -2px; }
 .tile-value.dim { font-size: 17px; }
+
+/* --- fejléc-logó --- */
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.brand img {
+    width: 34px;
+    height: auto;
+    display: block;
+}
